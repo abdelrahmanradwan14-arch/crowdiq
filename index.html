@@ -1,0 +1,2412 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CrowdIQ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────────── */
+:root {
+  /* Layout: sticky nav + tabbed mode switcher + scrollable content */
+  --bg:       #0d0f12;
+  --bg2:      #13161b;
+  --bg3:      #1a1e25;
+  --line:     rgba(255,255,255,0.07);
+  --line2:    rgba(255,255,255,0.13);
+  --fg:       #e8ecf2;
+  --muted:    #7a8494;
+  --dim:      #4a5260;
+  --volt:     #c8f135;
+  --volt2:    rgba(200,241,53,0.12);
+  --volt3:    rgba(200,241,53,0.06);
+  --blue:     #4a9eff;
+  --blue2:    rgba(74,158,255,0.12);
+  --yellow:   #f5c842;
+  --yellow2:  rgba(245,200,66,0.12);
+  --red:      #ff5a5a;
+  --red2:     rgba(255,90,90,0.12);
+  --green:    #2ecc71;
+  --green2:   rgba(46,204,113,0.12);
+  --r:        10px;
+  --r2:       14px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:    #f0f2f5;
+    --bg2:   #ffffff;
+    --bg3:   #e8eaee;
+    --line:  rgba(0,0,0,0.07);
+    --line2: rgba(0,0,0,0.13);
+    --fg:    #0d0f12;
+    --muted: #5a6475;
+    --dim:   #9aa3b0;
+    --volt:  #5a9e00;
+    --volt2: rgba(90,158,0,0.10);
+    --volt3: rgba(90,158,0,0.05);
+    --blue:  #1a7de8;
+    --blue2: rgba(26,125,232,0.10);
+    --yellow:#c49000;
+    --yellow2:rgba(196,144,0,0.10);
+    --red:   #d63030;
+    --red2:  rgba(214,48,48,0.10);
+    --green: #1a9e50;
+    --green2:rgba(26,158,80,0.10);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg:#f0f2f5;--bg2:#ffffff;--bg3:#e8eaee;--line:rgba(0,0,0,0.07);--line2:rgba(0,0,0,0.13);
+  --fg:#0d0f12;--muted:#5a6475;--dim:#9aa3b0;--volt:#5a9e00;--volt2:rgba(90,158,0,0.10);
+  --volt3:rgba(90,158,0,0.05);--blue:#1a7de8;--blue2:rgba(26,125,232,0.10);
+  --yellow:#c49000;--yellow2:rgba(196,144,0,0.10);--red:#d63030;--red2:rgba(214,48,48,0.10);
+  --green:#1a9e50;--green2:rgba(26,158,80,0.10);color-scheme:light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+  overflow-x: hidden;
+}
+
+/* ── NAV ─────────────────────────────────────────────────────────── */
+.nav {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  gap: 12px;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 101;
+  background: var(--bg);
+}
+.nav-logo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--volt);
+  text-transform: uppercase;
+}
+.nav-coins {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.coin-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg);
+}
+.coin-badge .coin-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--volt);
+}
+.coin-badge.chip .coin-dot { background: var(--blue); }
+.coin-badge.parlay .coin-dot { background: var(--yellow); }
+.coin-spent { color: var(--muted); font-weight: 400; }
+
+/* ── MODE TABS ───────────────────────────────────────────────────── */
+.mode-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mode-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.tab-btn:hover { border-color: var(--line2); color: var(--fg); }
+.tab-btn.active { background: var(--volt); border-color: var(--volt); color: #0d0f12; }
+
+/* ── GAMEWEEK HEADER ─────────────────────────────────────────────── */
+.gw-header {
+  padding: 16px 0 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.gw-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  color: var(--fg);
+}
+.gw-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.gw-pts {
+  text-align: right;
+}
+.gw-pts-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--volt);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.gw-pts-label { font-size: 11px; color: var(--muted); }
+
+/* ── MATCH CARD ──────────────────────────────────────────────────── */
+.match-card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  overflow: hidden;
+  margin-bottom: 10px;
+  transition: border-color .15s;
+}
+.match-card.picked { border-color: var(--line2); }
+.match-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.match-meta { font-size: 11px; color: var(--dim); letter-spacing: 0.05em; text-transform: uppercase; }
+.match-time { font-size: 11px; color: var(--muted); }
+.match-teams {
+  padding: 14px 14px 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+.team-home { text-align: right; }
+.team-away { text-align: left; }
+.team-flag { font-size: 28px; line-height: 1; display: block; margin-bottom: 4px; }
+.team-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg);
+}
+.vs-sep {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: 0.1em;
+}
+
+/* ── WINNER PICK ─────────────────────────────────────────────────── */
+.pick-section { padding: 12px 14px; border-top: 1px solid var(--line); }
+.pick-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.winner-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.w-btn {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 9px 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: all .12s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-family: inherit;
+}
+.w-btn:hover { border-color: var(--line2); background: var(--bg2); }
+.w-btn.sel { border-color: var(--volt); background: var(--volt2); }
+.w-btn-name { font-size: 11px; font-weight: 600; color: var(--fg); line-height: 1.2; }
+.w-btn-pct { font-size: 10px; color: var(--dim); }
+.w-btn-bucket { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; }
+.w-btn.sel .w-btn-name { color: var(--volt); }
+
+/* ── SCORE PICK ──────────────────────────────────────────────────── */
+.score-row { display: flex; align-items: center; gap: 10px; }
+.score-inputs { display: flex; align-items: center; gap: 8px; flex: 1; }
+.score-num {
+  width: 52px;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 10px 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--fg);
+  text-align: center;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.score-num::-webkit-inner-spin-button,
+.score-num::-webkit-outer-spin-button { -webkit-appearance: none; }
+.score-num:focus { border-color: var(--line2); background: var(--bg2); }
+.score-dash {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dim);
+}
+.stepper-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.stepper-btn {
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font-size: 20px;
+  font-weight: 400;
+  width: 40px;
+  height: 44px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .1s;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.stepper-btn:hover:not(:disabled) { background: var(--line2); }
+.stepper-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.stepper-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--fg);
+  min-width: 36px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  height: 44px;
+  line-height: 44px;
+}
+.score-reveal {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 8px 10px;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.score-reveal-bucket { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; }
+.score-reveal-pts { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+/* ── COINS UI ────────────────────────────────────────────────────── */
+.coin-alloc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  background: var(--volt3);
+}
+.coin-alloc-label { font-size: 11px; color: var(--muted); }
+.coin-alloc-label strong { color: var(--volt); }
+.coin-pips { display: flex; gap: 5px; align-items: center; }
+.coin-pip {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--volt);
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--volt);
+  transition: all .12s;
+  font-family: inherit;
+}
+.coin-pip.filled { background: var(--volt); color: #0d0f12; }
+.coin-pip:disabled { opacity: 0.3; cursor: not-allowed; }
+.coin-mult-preview { font-size: 11px; color: var(--volt); font-weight: 600; }
+
+/* ── COMBINED PREVIEW ────────────────────────────────────────────── */
+.combo-preview {
+  margin: 0 14px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: var(--r);
+  padding: 10px 12px;
+  display: none;
+}
+.combo-preview.show { display: block; }
+.combo-row { display: flex; justify-content: space-between; align-items: center; }
+.combo-label { font-size: 11px; color: var(--muted); }
+.combo-pts {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.combo-total {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.combo-total-label { font-size: 12px; font-weight: 600; color: var(--fg); }
+.combo-total-pts {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--volt);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── LOCK BUTTON ─────────────────────────────────────────────────── */
+.lock-btn {
+  display: block;
+  width: 100%;
+  background: var(--volt);
+  color: #0d0f12;
+  border: none;
+  border-radius: 0 0 var(--r2) var(--r2);
+  padding: 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: opacity .15s;
+  margin-top: 2px;
+}
+.lock-btn:hover { opacity: 0.9; }
+.lock-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.locked-badge {
+  display: block;
+  width: 100%;
+  background: var(--bg3);
+  border: none;
+  border-radius: 0 0 var(--r2) var(--r2);
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+/* ── CHIP GAME ───────────────────────────────────────────────────── */
+.chip-match-block {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.chip-match-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chip-match-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.chip-pick-limit { font-size: 11px; color: var(--muted); }
+.chip-events { display: flex; flex-direction: column; }
+.chip-event {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background .1s;
+  gap: 10px;
+}
+.chip-event:last-child { border-bottom: none; }
+.chip-event:hover { background: var(--bg3); }
+.chip-event.sel-blue { background: var(--blue2); }
+.chip-event.sel-yellow { background: var(--yellow2); }
+.chip-event.sel-red { background: var(--red2); }
+.chip-event-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.chip-color-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.chip-color-dot.blue { background: var(--blue); }
+.chip-color-dot.yellow { background: var(--yellow); }
+.chip-color-dot.red { background: var(--red); }
+.chip-event-text { font-size: 13px; color: var(--fg); line-height: 1.3; }
+.chip-event-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.chip-band-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  border-radius: 10px;
+}
+.chip-band-label.blue { background: var(--blue2); color: var(--blue); }
+.chip-band-label.yellow { background: var(--yellow2); color: var(--yellow); }
+.chip-band-label.red { background: var(--red2); color: var(--red); }
+.chip-pts {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: right;
+}
+.chip-pts.blue { color: var(--blue); }
+.chip-pts.yellow { color: var(--yellow); }
+.chip-pts.red { color: var(--red); }
+.chip-check {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: all .12s;
+}
+.chip-event.sel-blue .chip-check,
+.chip-event.sel-yellow .chip-check,
+.chip-event.sel-red .chip-check {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+
+/* Chip coin row */
+.chip-coin-row {
+  padding: 8px 14px;
+  border-top: 1px solid var(--line);
+  background: rgba(74,158,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chip-coin-label { font-size: 11px; color: var(--muted); }
+.chip-coin-label strong { color: var(--blue); }
+
+/* ── PARLAY ──────────────────────────────────────────────────────── */
+.parlay-mult-legend {
+  display: flex;
+  gap: 14px;
+  padding: 8px 0 12px;
+}
+.pml-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); font-weight: 600; }
+.pml-dot { width: 8px; height: 8px; border-radius: 50%; }
+.pml-dot.d1 { background: var(--muted); }
+.pml-dot.d2 { background: var(--yellow); }
+.pml-dot.d3 { background: var(--red); }
+
+.parlay-card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.parlay-header {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.parlay-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.parlay-sel-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 10px;
+  letter-spacing: 0.04em;
+  transition: all .15s;
+}
+.parlay-sel-badge.n0 { background: var(--bg3); color: var(--dim); }
+.parlay-sel-badge.n1 { background: var(--bg3); color: var(--muted); }
+.parlay-sel-badge.n2 { background: var(--yellow2); color: var(--yellow); }
+.parlay-sel-badge.n3 { background: var(--red2); color: var(--red); }
+
+/* Event grid */
+.parlay-events {
+  display: flex;
+  flex-direction: column;
+}
+.parlay-ev {
+  display: flex;
+  align-items: center;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  gap: 10px;
+  cursor: pointer;
+  transition: background .1s;
+}
+.parlay-ev:last-child { border-bottom: none; }
+.parlay-ev:hover { background: var(--bg3); }
+.parlay-ev.sel { background: var(--yellow2); }
+.parlay-ev-check {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: all .12s;
+}
+.parlay-ev.sel .parlay-ev-check { background: var(--yellow); border-color: var(--yellow); color: #0d0f12; }
+.parlay-ev-text { flex: 1; font-size: 13px; color: var(--fg); }
+.parlay-ev.sel .parlay-ev-text { color: var(--yellow); font-weight: 500; }
+.parlay-ev-prob { font-size: 11px; color: var(--dim); flex-shrink: 0; }
+.parlay-ev-pts {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+  min-width: 32px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.parlay-ev.sel .parlay-ev-pts { color: var(--yellow); }
+
+/* Payout footer */
+.parlay-footer {
+  padding: 11px 14px;
+  border-top: 1px solid var(--line);
+  background: rgba(245,200,66,0.04);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+}
+.parlay-footer-label { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.parlay-footer-label strong { color: var(--yellow); display: block; font-size: 12px; }
+.parlay-footer-payout {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--yellow);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.parlay-footer-payout.big { color: var(--red); }
+
+/* ── SECTION DIVIDER ─────────────────────────────────────────────── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 12px;
+}
+.section-divider-line { flex: 1; height: 1px; background: var(--line); }
+.section-divider-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── BUCKET COLORS ───────────────────────────────────────────────── */
+.bk-safe     { color: var(--muted); }
+.bk-safeish  { color: var(--blue); }
+.bk-medium   { color: var(--yellow); }
+.bk-risky    { color: #ff9a3c; }
+.bk-vrisky   { color: var(--red); }
+
+/* ── TOAST ───────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--fg);
+  color: var(--bg);
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transition: all .25s;
+  pointer-events: none;
+  z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── SCROLL AREA ─────────────────────────────────────────────────── */
+.scroll-area { padding-bottom: max(32px, env(safe-area-inset-bottom, 0px)); }
+
+/* ── MODE PANELS ─────────────────────────────────────────────────── */
+.mode-panel { display: none; }
+.mode-panel.active { display: block; }
+
+/* ── PICK THE XI ─────────────────────────────────────────────────── */
+.xi-fixture-banner {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.xi-fixture-teams {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.xi-fixture-teams span { color: var(--volt); }
+.xi-fixture-meta { font-size: 11px; color: var(--muted); text-align: right; }
+.xi-fixture-meta strong { color: var(--fg); display: block; }
+
+.xi-pitch-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.xi-pitch-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.xi-pitch-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.xi-count-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--fg);
+}
+.xi-count-badge span { color: var(--volt); }
+.xi-pitch {
+  background: repeating-linear-gradient(to bottom, #1c4420 0px, #1c4420 28px, #1a3d1a 28px, #1a3d1a 56px);
+  padding: 16px 8px 20px;
+  min-height: 340px;
+  position: relative;
+}
+.xi-pitch::before {
+  content: '';
+  position: absolute;
+  left: 10%; right: 10%;
+  top: 50%; height: 1px;
+  background: rgba(255,255,255,0.12);
+}
+.xi-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.xi-row:last-child { margin-bottom: 0; }
+.xi-slot {
+  width: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.xi-slot-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  transition: all .15s;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+}
+.xi-slot.filled .xi-slot-circle {
+  border: 2px solid #ef0107;
+  background: rgba(239,1,7,0.18);
+  color: #fff;
+  font-size: 20px;
+}
+.xi-slot.drag-over .xi-slot-circle {
+  border-color: var(--volt);
+  background: rgba(200,241,53,0.2);
+  transform: scale(1.08);
+}
+.xi-slot-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(255,255,255,0.55);
+  text-align: center;
+  line-height: 1.2;
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.xi-slot.filled .xi-slot-name { color: #fff; }
+.xi-slot-remove {
+  position: absolute;
+  top: 0px; right: 0px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: rgba(255,90,90,0.9);
+  color: #fff;
+  font-size: 9px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .1s;
+  z-index: 2;
+}
+.xi-slot.filled .xi-slot-circle:hover .xi-slot-remove { opacity: 1; }
+
+.xi-squad-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.xi-squad-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.xi-squad-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.xi-squad-hint { font-size: 11px; color: var(--dim); }
+.xi-squad-section { padding: 10px 14px 4px; }
+.xi-squad-pos-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+.xi-squad-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.xi-player-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 5px 10px 5px 7px;
+  cursor: grab;
+  user-select: none;
+  transition: all .12s;
+  touch-action: none;
+}
+.xi-player-chip:hover { border-color: var(--line2); background: var(--bg2); }
+.xi-player-chip.in-xi { opacity: 0.3; pointer-events: none; }
+.xi-chip-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.xi-chip-dot.gk { background: #f5c842; }
+.xi-chip-dot.def { background: #4a9eff; }
+.xi-chip-dot.mid { background: var(--volt); }
+.xi-chip-dot.fwd { background: var(--red); }
+.xi-chip-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--fg);
+  white-space: nowrap;
+}
+.xi-chip-name.key { color: var(--volt); }
+#xi-drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  background: var(--fg);
+  color: var(--bg);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transition: opacity .08s;
+  white-space: nowrap;
+  transform: translate(-50%, -130%);
+}
+#xi-drag-ghost.show { opacity: 1; }
+.xi-lock-btn {
+  display: block;
+  width: 100%;
+  background: var(--volt);
+  color: #0d0f12;
+  border: none;
+  border-radius: var(--r2);
+  padding: 14px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: opacity .15s;
+  margin-bottom: 14px;
+}
+.xi-lock-btn:hover:not(:disabled) { opacity: 0.9; }
+.xi-lock-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.xi-locked-msg {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  padding: 14px 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+/* ── XI squad pool ──────────────────────────────────────────────── */
+.xi-squad-section { margin-bottom: 10px; }
+.xi-squad-pos-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.xi-squad-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.xi-slot-initials {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .03em;
+  line-height: 1;
+  pointer-events: none;
+}
+.xi-player-chip.used {
+  opacity: 0.3;
+  cursor: default;
+}
+.xi-player-chip.used .xi-chip-name { color: var(--muted); }
+
+/* ── AUTH MODAL ─────────────────────────────────────────────────── */
+.auth-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.auth-overlay.hidden { display: none; }
+.auth-box {
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r2);
+  padding: 28px 24px;
+  width: 100%; max-width: 360px;
+}
+.auth-logo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px; font-weight: 800;
+  color: var(--volt); letter-spacing: .05em;
+  text-align: center; margin-bottom: 4px;
+}
+.auth-sub {
+  text-align: center; font-size: 12px;
+  color: var(--muted); margin-bottom: 20px;
+}
+.auth-tabs {
+  display: flex; gap: 0;
+  border: 1px solid var(--line2);
+  border-radius: var(--r); overflow: hidden;
+  margin-bottom: 20px;
+}
+.auth-tab {
+  flex: 1; padding: 8px; font-size: 13px;
+  font-weight: 600; border: none; cursor: pointer;
+  background: transparent; color: var(--muted);
+  transition: background .15s, color .15s;
+}
+.auth-tab.active { background: var(--volt); color: #000; }
+.auth-field { margin-bottom: 12px; }
+.auth-field label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: var(--muted); margin-bottom: 5px;
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.auth-field input {
+  width: 100%; padding: 10px 12px;
+  background: var(--bg3); border: 1px solid var(--line2);
+  border-radius: var(--r); color: var(--fg); font-size: 14px;
+  outline: none;
+}
+.auth-field input:focus { border-color: var(--volt); }
+.auth-submit {
+  width: 100%; padding: 11px;
+  background: var(--volt); color: #000;
+  font-weight: 700; font-size: 14px;
+  border: none; border-radius: var(--r);
+  cursor: pointer; margin-top: 4px;
+}
+.auth-submit:disabled { opacity: .4; cursor: not-allowed; }
+.auth-err {
+  font-size: 12px; color: var(--red);
+  text-align: center; margin-top: 10px; min-height: 16px;
+}
+/* Nav auth button */
+.nav-auth-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg2); border: 1px solid var(--line2);
+  border-radius: 20px; padding: 5px 10px 5px 7px;
+  cursor: pointer; font-size: 12px; font-weight: 600;
+  color: var(--fg);
+}
+.nav-avatar {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--volt); color: #000;
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── LEADERBOARD ─────────────────────────────────────────────────── */
+.lb-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.lb-rank {
+  width: 28px; text-align: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 700; color: var(--muted);
+}
+.lb-rank.top { color: var(--volt); }
+.lb-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg3); border: 1px solid var(--line2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--fg); flex-shrink: 0;
+}
+.lb-name { flex: 1; font-size: 14px; font-weight: 500; }
+.lb-name.me { color: var(--volt); font-weight: 700; }
+.lb-pts {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 700; color: var(--fg);
+}
+.lb-pts-label { font-size: 11px; color: var(--muted); }
+.lb-empty {
+  text-align: center; padding: 40px 16px;
+  color: var(--muted); font-size: 13px;
+}
+.lb-you-row {
+  background: var(--volt3);
+  border-radius: var(--r);
+  padding-left: 8px; padding-right: 8px;
+  margin: 0 -8px;
+}
+
+/* ── STATUS BAR (chip picks used) ───────────────────────────────── */
+.chip-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 12px;
+}
+.chip-picks-remaining {
+  font-size: 12px;
+  color: var(--muted);
+}
+.chip-picks-remaining strong { color: var(--fg); }
+.chip-picks-pips { display: flex; gap: 4px; }
+.chip-pip-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--line2);
+  transition: background .15s;
+}
+.chip-pip-dot.used { background: var(--volt); }
+</style>
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">CrowdIQ</div>
+    <div class="auth-sub">Premier League Prediction Game · GW10</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="auth-tab-login" onclick="authShowTab('login')">Log In</button>
+      <button class="auth-tab" id="auth-tab-signup" onclick="authShowTab('signup')">Sign Up</button>
+    </div>
+    <div id="auth-login-form">
+      <div class="auth-field"><label>Email</label><input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="auth-pass" placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="auth-submit" id="auth-submit" onclick="authSubmit()">Log In</button>
+      <div class="auth-err" id="auth-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">CrowdIQ</div>
+  <div class="nav-coins">
+    <div class="coin-badge" id="badge-match">
+      <span class="coin-dot"></span>
+      <span id="coins-match">5</span>
+      <span class="coin-spent">/ 5</span>
+    </div>
+    <div class="coin-badge chip" id="badge-chip">
+      <span class="coin-dot"></span>
+      <span id="coins-chip">3</span>
+      <span class="coin-spent">/ 3</span>
+    </div>
+    <div class="coin-badge parlay" id="badge-parlay">
+      <span class="coin-dot"></span>
+      <span id="coins-parlay">2</span>
+      <span class="coin-spent">/ 2</span>
+    </div>
+    <button class="nav-auth-btn" id="nav-auth-btn" onclick="navAuthClick()">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span id="nav-auth-label">Log In</span>
+    </button>
+  </div>
+</nav>
+
+<div class="mode-tabs">
+  <button class="tab-btn active" data-mode="match">Match Predictor</button>
+  <button class="tab-btn" data-mode="chip">Chip Game</button>
+  <button class="tab-btn" data-mode="parlay">Parlay Builder</button>
+  <button class="tab-btn" data-mode="xi">Pick the XI</button>
+  <button class="tab-btn" data-mode="lb">Leaderboard</button>
+</div>
+
+<div class="scroll-area">
+
+<!-- ── MATCH PREDICTOR ────────────────────────────────────────────── -->
+<div class="mode-panel active" id="panel-match">
+  <div class="gw-header">
+    <div>
+      <div class="gw-title">Gameweek 10</div>
+      <div class="gw-sub">Thu–Sun 6–8 Nov 2026 · 10 matches</div>
+    </div>
+    <div class="gw-pts">
+      <div class="gw-pts-num" id="match-pts-total">0</div>
+      <div class="gw-pts-label">max pts</div>
+    </div>
+  </div>
+  <div id="match-list"></div>
+</div>
+
+<!-- ── CHIP GAME ──────────────────────────────────────────────────── -->
+<div class="mode-panel" id="panel-chip">
+  <div class="gw-header">
+    <div>
+      <div class="gw-title">Chip Game</div>
+      <div class="gw-sub">Pick 5 of 9 events · GW9</div>
+    </div>
+    <div class="gw-pts">
+      <div class="gw-pts-num" id="chip-pts-total">0</div>
+      <div class="gw-pts-label">max pts</div>
+    </div>
+  </div>
+  <div class="chip-status-bar">
+    <div class="chip-picks-remaining">Picks used: <strong id="chip-used">0</strong> / 5</div>
+    <div class="chip-picks-pips" id="chip-pips"></div>
+  </div>
+  <div id="chip-list"></div>
+  <div class="chip-coin-row" style="border-radius:var(--r2);margin-bottom:10px;border:1px solid var(--line)">
+    <div class="chip-coin-label">Chip coins: <strong id="chip-coins-display">3</strong> remaining · max 2× per pick</div>
+    <div class="coin-pips" id="chip-global-coins"></div>
+  </div>
+</div>
+
+<!-- ── PARLAY BUILDER ─────────────────────────────────────────────── -->
+<div class="mode-panel" id="panel-parlay">
+  <div class="gw-header">
+    <div>
+      <div class="gw-title">Parlay Builder</div>
+      <div class="gw-sub" id="parlay-sub">Choose 3 matches · pick 1–3 events each · all must hit</div>
+    </div>
+    <div class="gw-pts">
+      <div class="gw-pts-num" id="parlay-pts-total">0</div>
+      <div class="gw-pts-label">max pts</div>
+    </div>
+  </div>
+  <div class="parlay-mult-legend">
+    <span class="pml-item"><span class="pml-dot d1"></span>1 leg = 1×</span>
+    <span class="pml-item"><span class="pml-dot d2"></span>2 legs = 4×</span>
+    <span class="pml-item"><span class="pml-dot d3"></span>3 legs = 15×</span>
+  </div>
+  <div id="parlay-list"></div>
+</div>
+
+<!-- ── PICK THE XI ──────────────────────────────────────────────── -->
+<div class="mode-panel" id="panel-xi">
+  <div class="gw-header">
+    <div>
+      <div class="gw-title">Pick the XI</div>
+      <div class="gw-sub">Arsenal · Sat 7 Nov · locks 14:00 UTC</div>
+    </div>
+    <div class="gw-pts">
+      <div class="gw-pts-num" id="xi-pts-total">0</div>
+      <div class="gw-pts-label">placed</div>
+    </div>
+  </div>
+
+  <div class="xi-fixture-banner">
+    <div class="xi-fixture-teams"><span>Arsenal</span> vs Hull</div>
+    <div class="xi-fixture-meta">
+      <strong>Sat 7 Nov · 15:00</strong>
+      Sat 15:00 · 1pt per correct starter
+    </div>
+  </div>
+
+  <div class="xi-pitch-wrap">
+    <div class="xi-pitch-header">
+      <div class="xi-pitch-title">4-5-1 · Your lineup</div>
+      <div class="xi-count-badge" id="xi-count"><span>0</span> / 11</div>
+    </div>
+    <div class="xi-pitch" id="xi-pitch">
+      <!-- GK row -->
+      <div class="xi-row" id="xi-row-gk">
+        <div class="xi-slot" data-slot="0"><div class="xi-slot-circle">GK</div><div class="xi-slot-name">—</div></div>
+      </div>
+      <!-- DEF row (4) -->
+      <div class="xi-row" id="xi-row-def">
+        <div class="xi-slot" data-slot="1"><div class="xi-slot-circle">DEF</div><div class="xi-slot-name">—</div></div>
+        <div class="xi-slot" data-slot="2"><div class="xi-slot-circle">DEF</div><div class="xi-slot-name">—</div></div>
+        <div class="xi-slot" data-slot="3"><div class="xi-slot-circle">DEF</div><div class="xi-slot-name">—</div></div>
+        <div class="xi-slot" data-slot="4"><div class="xi-slot-circle">DEF</div><div class="xi-slot-name">—</div></div>
+      </div>
+      <!-- MID row (5) -->
+      <div class="xi-row" id="xi-row-mid">
+        <div class="xi-slot" data-slot="5"><div class="xi-slot-circle">MID</div><div class="xi-slot-name">—</div></div>
+        <div class="xi-slot" data-slot="6"><div class="xi-slot-circle">MID</div><div class="xi-slot-name">—</div></div>
+        <div class="xi-slot" data-slot="7"><div class="xi-slot-circle">MID</div><div class="xi-slot-name">—</div></div>
+        <div class="xi-slot" data-slot="8"><div class="xi-slot-circle">MID</div><div class="xi-slot-name">—</div></div>
+        <div class="xi-slot" data-slot="9"><div class="xi-slot-circle">MID</div><div class="xi-slot-name">—</div></div>
+      </div>
+      <!-- FWD row (1) -->
+      <div class="xi-row" id="xi-row-fwd">
+        <div class="xi-slot" data-slot="10"><div class="xi-slot-circle">FWD</div><div class="xi-slot-name">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="xi-squad-wrap">
+    <div class="xi-squad-header">
+      <div class="xi-squad-title">Arsenal Squad</div>
+      <div class="xi-squad-hint">Drag onto pitch · tap to place</div>
+    </div>
+    <div id="xi-squad-pool"></div>
+  </div>
+
+  <button class="xi-lock-btn" id="xi-lock-btn" disabled>Lock In XI (11/11)</button>
+  <div id="xi-locked-msg" style="display:none" class="xi-locked-msg">✓ Lineup locked — good luck!</div>
+</div>
+
+</div>
+
+<!-- LEADERBOARD PANEL -->
+<div class="mode-panel" id="panel-lb">
+  <div class="gw-header">
+    <div class="gw-title">Leaderboard</div>
+    <div class="gw-sub">Gameweek 10 · Top players</div>
+  </div>
+  <div id="lb-list"><div class="lb-empty">Log in to see the leaderboard</div></div>
+</div>
+
+<div id="xi-drag-ghost"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────
+const MATCHES = [
+  {id:'m1',home:{n:'Everton',f:'🔵'},away:{n:'Coventry',f:'🩵'},time:'Thu 20:00',crowd:[42,29,29]},
+  {id:'m2',home:{n:'Leeds',f:'⚪'},away:{n:'Spurs',f:'⚪'},time:'Sat 12:30',crowd:[37,33,30]},
+  {id:'m3',home:{n:'Arsenal',f:'🔴'},away:{n:'Hull',f:'🟡'},time:'Sat 15:00',crowd:[39,34,27]},
+  {id:'m4',home:{n:'Fulham',f:'⚫'},away:{n:'Newcastle',f:'⚫'},time:'Sat 15:00',crowd:[40,29,31]},
+  {id:'m5',home:{n:'Nottm Forest',f:'🔴'},away:{n:'Man City',f:'🔵'},time:'Sat 17:30',crowd:[32,29,39]},
+  {id:'m6',home:{n:'Crystal Palace',f:'🔴'},away:{n:'Liverpool',f:'🔴'},time:'Sun 14:00',crowd:[29,27,44]},
+  {id:'m7',home:{n:'Sunderland',f:'🔴'},away:{n:'Chelsea',f:'🔵'},time:'Sun 14:00',crowd:[35,25,40]},
+  {id:'m8',home:{n:'Ipswich',f:'🔵'},away:{n:'Bournemouth',f:'🍒'},time:'Sun 14:00',crowd:[34,27,39]},
+  {id:'m9',home:{n:'Brighton',f:'🔵'},away:{n:'Brentford',f:'🔴'},time:'Sun 14:00',crowd:[42,29,29]},
+  {id:'m10',home:{n:'Man Utd',f:'🔴'},away:{n:'Aston Villa',f:'🟣'},time:'Sun 16:30',crowd:[36,28,36]},
+];
+
+// Score buckets tuned to match winner payout range (~10–80pts)
+// so neither component dominates the combined total
+const BUCKETS = [
+  {id:0,name:'Safe',     pts:10,  color:'bk-safe'},
+  {id:1,name:'Safeish', pts:20,  color:'bk-safeish'},
+  {id:2,name:'Medium',  pts:35,  color:'bk-medium'},
+  {id:3,name:'Risky',   pts:55,  color:'bk-risky'},
+  {id:4,name:'V.Risky', pts:80,  color:'bk-vrisky'},
+];
+
+// Poisson: score implied prob → bucket
+function scoreProb(h,a){
+  // xG from rough parity
+  const xH=0.5+0.8*(h>=a?0.5:-0.3),xA=0.5+0.8*(a>h?0.5:-0.3);
+  function pois(k,l){let r=Math.exp(-l);for(let i=0;i<k;i++)r*=l/( i+1);return r;}
+  return pois(h,xH)*pois(a,xA);
+}
+function scoreBucket(p){
+  if(p>=0.10)return 0;if(p>=0.05)return 1;if(p>=0.02)return 2;if(p>=0.006)return 3;return 4;
+}
+function winnerBucket(pct){
+  if(pct>=60)return 0;if(pct>=40)return 1;if(pct>=25)return 2;if(pct>=15)return 3;return 4;
+}
+
+// Continuous payout: 500 × (1/pct)^0.7, scaled so 50%→~10, 10%→~90, 5%→~220
+// Bucket label is still categorical, but pts vary smoothly with exact %
+function winnerPayout(pct){
+  if(pct<=0) return 500;
+  // anchor: pct=50 → 10pts, pct=5 → 220pts, pct=2 → 500pts
+  // formula: pts = 10 * (50/pct)^1.4
+  const pts = Math.round(10 * Math.pow(50 / pct, 1.4));
+  return Math.min(500, Math.max(10, pts));
+}
+
+// ── STATE ───────────────────────────────────────────────────────────
+const state = {
+  picks: {},       // matchId → {winner, sh, sa, wCoins, sCoins, locked}
+  chipPicks: {},   // eventKey → {band, coins}
+  parlayActive: new Set(), // which match ids are activated (max 3)
+  parlayPicks: {},         // matchId → Set of selected event keys (max 3)
+  coins: {match:5, chip:3, parlay:2},
+};
+
+// ── CHIP EVENTS ─────────────────────────────────────────────────────
+const CHIP_MATCHES = [
+  {match:'Everton vs Coventry', events:[
+    {key:'c1a',band:0,text:'Both teams score',              pts:10},
+    {key:'c1b',band:1,text:'Thierno Barry scores',         pts:22},
+    {key:'c1c',band:2,text:'4+ total goals',               pts:80},
+  ]},
+  {match:'Leeds vs Spurs', events:[
+    {key:'c2a',band:0,text:'Both teams score',              pts:10},
+    {key:'c2b',band:1,text:'D. Calvert-Lewin scores',      pts:22},
+    {key:'c2c',band:2,text:'4+ total goals',               pts:80},
+  ]},
+  {match:'Arsenal vs Hull', events:[
+    {key:'c3a',band:0,text:'Both teams score',              pts:10},
+    {key:'c3b',band:1,text:'Kai Havertz scores',           pts:22},
+    {key:'c3c',band:2,text:'4+ total goals',               pts:80},
+  ]},
+  {match:'Fulham vs Newcastle', events:[
+    {key:'c4a',band:0,text:'Both teams score',              pts:10},
+    {key:'c4b',band:1,text:'Rodrigo Muniz scores',         pts:22},
+    {key:'c4c',band:2,text:'4+ total goals',               pts:80},
+  ]},
+  {match:'Nottm Forest vs Man City', events:[
+    {key:'c5a',band:0,text:'Both teams score',              pts:9},
+    {key:'c5b',band:1,text:'Erling Haaland scores',        pts:22},
+    {key:'c5c',band:2,text:'4+ total goals',               pts:80},
+  ]},
+  {match:'Crystal Palace vs Liverpool', events:[
+    {key:'c6a',band:0,text:'Both teams score',              pts:10},
+    {key:'c6b',band:1,text:'Mateta scores',                pts:22},
+    {key:'c6c',band:2,text:'4+ total goals',               pts:80},
+  ]},
+  {match:'Sunderland vs Chelsea', events:[
+    {key:'c7a',band:0,text:'Both teams score',              pts:10},
+    {key:'c7b',band:1,text:'João Pedro scores',            pts:22},
+    {key:'c7c',band:2,text:'4+ total goals',               pts:80},
+  ]},
+  {match:'Ipswich vs Bournemouth', events:[
+    {key:'c8a',band:0,text:'Both teams score',              pts:10},
+    {key:'c8b',band:1,text:'Evanilson scores',             pts:22},
+    {key:'c8c',band:2,text:'4+ total goals',               pts:80},
+  ]},
+  {match:'Brighton vs Brentford', events:[
+    {key:'c9a',band:0,text:'Both teams score',              pts:9},
+    {key:'c9b',band:1,text:'Evan Ferguson scores',         pts:22},
+    {key:'c9c',band:2,text:'4+ total goals',               pts:53},
+  ]},
+  {match:'Man Utd vs Aston Villa', events:[
+    {key:'c10a',band:0,text:'Both teams score',             pts:10},
+    {key:'c10b',band:1,text:'Benjamin Šeško scores',       pts:22},
+    {key:'c10c',band:2,text:'4+ total goals',              pts:80},
+  ]},
+];
+const BAND_LABELS = ['BLUE','YELLOW','RED'];
+const BAND_CSS = ['blue','yellow','red'];
+
+// ── PARLAY EVENTS — per match, 6 events each ─────────────────────────
+// prob: rough hit probability (drives payout display)
+// pts: base payout if this leg hits
+const PARLAY_MATCHES = [
+  {id:'pm1', label:'Everton vs Coventry', events:[
+    {key:'pm1a', text:'Everton win',               prob:42, pts:13, group:'result'},
+    {key:'pm1b', text:'Draw',                      prob:29, pts:21, group:'result'},
+    {key:'pm1c', text:'Coventry win',              prob:29, pts:22, group:'result'},
+    {key:'pm1d', text:'0–1 total goals',           prob:61, pts:8,  group:'goals'},
+    {key:'pm1e', text:'2–3 total goals',           prob:34, pts:17, group:'goals'},
+    {key:'pm1f', text:'4+ total goals',            prob:5,  pts:80, group:'goals'},
+    {key:'pm1g', text:'Thierno Barry scores',      prob:29, pts:22},
+    {key:'pm1h', text:'Taiwo Awoniyi scores',      prob:29, pts:22},
+    {key:'pm1i', text:'Both teams score',          prob:50, pts:10},
+  ]},
+  {id:'pm2', label:'Leeds vs Spurs', events:[
+    {key:'pm2a', text:'Leeds win',                 prob:37, pts:15, group:'result'},
+    {key:'pm2b', text:'Draw',                      prob:33, pts:18, group:'result'},
+    {key:'pm2c', text:'Spurs win',                 prob:30, pts:20, group:'result'},
+    {key:'pm2d', text:'0–1 total goals',           prob:61, pts:8,  group:'goals'},
+    {key:'pm2e', text:'2–3 total goals',           prob:34, pts:17, group:'goals'},
+    {key:'pm2f', text:'4+ total goals',            prob:5,  pts:80, group:'goals'},
+    {key:'pm2g', text:'D. Calvert-Lewin scores',   prob:29, pts:22},
+    {key:'pm2h', text:'Dominic Solanke scores',    prob:29, pts:22},
+    {key:'pm2i', text:'Both teams score',          prob:50, pts:10},
+  ]},
+  {id:'pm3', label:'Arsenal vs Hull', events:[
+    {key:'pm3a', text:'Arsenal win',               prob:39, pts:14, group:'result'},
+    {key:'pm3b', text:'Draw',                      prob:34, pts:17, group:'result'},
+    {key:'pm3c', text:'Hull win',                  prob:27, pts:24, group:'result'},
+    {key:'pm3d', text:'0–1 total goals',           prob:60, pts:8,  group:'goals'},
+    {key:'pm3e', text:'2–3 total goals',           prob:35, pts:17, group:'goals'},
+    {key:'pm3f', text:'4+ total goals',            prob:5,  pts:80, group:'goals'},
+    {key:'pm3g', text:'Kai Havertz scores',        prob:29, pts:22},
+    {key:'pm3h', text:'Oliver McBurnie scores',    prob:29, pts:22},
+    {key:'pm3i', text:'Both teams score',          prob:50, pts:10},
+  ]},
+  {id:'pm4', label:'Fulham vs Newcastle', events:[
+    {key:'pm4a', text:'Fulham win',                prob:40, pts:14, group:'result'},
+    {key:'pm4b', text:'Draw',                      prob:29, pts:22, group:'result'},
+    {key:'pm4c', text:'Newcastle win',             prob:31, pts:19, group:'result'},
+    {key:'pm4d', text:'0–1 total goals',           prob:61, pts:8,  group:'goals'},
+    {key:'pm4e', text:'2–3 total goals',           prob:34, pts:17, group:'goals'},
+    {key:'pm4f', text:'4+ total goals',            prob:5,  pts:80, group:'goals'},
+    {key:'pm4g', text:'Rodrigo Muniz scores',      prob:29, pts:22},
+    {key:'pm4h', text:'Yoane Wissa scores',        prob:29, pts:22},
+    {key:'pm4i', text:'Both teams score',          prob:50, pts:10},
+  ]},
+  {id:'pm5', label:'Nottm Forest vs Man City', events:[
+    {key:'pm5a', text:'Nottm Forest win',          prob:32, pts:19, group:'result'},
+    {key:'pm5b', text:'Draw',                      prob:29, pts:22, group:'result'},
+    {key:'pm5c', text:'Man City win',              prob:39, pts:14, group:'result'},
+    {key:'pm5d', text:'0–1 total goals',           prob:52, pts:10, group:'goals'},
+    {key:'pm5e', text:'2–3 total goals',           prob:40, pts:14, group:'goals'},
+    {key:'pm5f', text:'4+ total goals',            prob:8,  pts:80, group:'goals'},
+    {key:'pm5g', text:'Chris Wood scores',         prob:29, pts:22},
+    {key:'pm5h', text:'Erling Haaland scores',     prob:29, pts:22},
+    {key:'pm5i', text:'Both teams score',          prob:52, pts:9},
+  ]},
+  {id:'pm6', label:'Crystal Palace vs Liverpool', events:[
+    {key:'pm6a', text:'Crystal Palace win',        prob:29, pts:21, group:'result'},
+    {key:'pm6b', text:'Draw',                      prob:27, pts:24, group:'result'},
+    {key:'pm6c', text:'Liverpool win',             prob:44, pts:12, group:'result'},
+    {key:'pm6d', text:'0–1 total goals',           prob:61, pts:8,  group:'goals'},
+    {key:'pm6e', text:'2–3 total goals',           prob:34, pts:17, group:'goals'},
+    {key:'pm6f', text:'4+ total goals',            prob:5,  pts:80, group:'goals'},
+    {key:'pm6g', text:'Mateta scores',             prob:29, pts:22},
+    {key:'pm6h', text:'Alexander Isak scores',     prob:29, pts:22},
+    {key:'pm6i', text:'Both teams score',          prob:50, pts:10},
+  ]},
+  {id:'pm7', label:'Sunderland vs Chelsea', events:[
+    {key:'pm7a', text:'Sunderland win',            prob:35, pts:17, group:'result'},
+    {key:'pm7b', text:'Draw',                      prob:25, pts:26, group:'result'},
+    {key:'pm7c', text:'Chelsea win',               prob:40, pts:14, group:'result'},
+    {key:'pm7d', text:'0–1 total goals',           prob:53, pts:9,  group:'goals'},
+    {key:'pm7e', text:'2–3 total goals',           prob:40, pts:14, group:'goals'},
+    {key:'pm7f', text:'4+ total goals',            prob:8,  pts:80, group:'goals'},
+    {key:'pm7g', text:'Wilson Isidor scores',      prob:29, pts:22},
+    {key:'pm7h', text:'João Pedro scores',         prob:29, pts:22},
+    {key:'pm7i', text:'Both teams score',          prob:52, pts:10},
+  ]},
+  {id:'pm8', label:'Ipswich vs Bournemouth', events:[
+    {key:'pm8a', text:'Ipswich win',               prob:34, pts:17, group:'result'},
+    {key:'pm8b', text:'Draw',                      prob:27, pts:24, group:'result'},
+    {key:'pm8c', text:'Bournemouth win',           prob:39, pts:14, group:'result'},
+    {key:'pm8d', text:'0–1 total goals',           prob:59, pts:8,  group:'goals'},
+    {key:'pm8e', text:'2–3 total goals',           prob:35, pts:16, group:'goals'},
+    {key:'pm8f', text:'4+ total goals',            prob:5,  pts:80, group:'goals'},
+    {key:'pm8g', text:'Chuba Akpom scores',        prob:29, pts:22},
+    {key:'pm8h', text:'Evanilson scores',          prob:29, pts:22},
+    {key:'pm8i', text:'Both teams score',          prob:50, pts:10},
+  ]},
+  {id:'pm9', label:'Brighton vs Brentford', events:[
+    {key:'pm9a', text:'Brighton win',              prob:42, pts:13, group:'result'},
+    {key:'pm9b', text:'Draw',                      prob:29, pts:21, group:'result'},
+    {key:'pm9c', text:'Brentford win',             prob:28, pts:22, group:'result'},
+    {key:'pm9d', text:'0–1 total goals',           prob:39, pts:14, group:'goals'},
+    {key:'pm9e', text:'2–3 total goals',           prob:46, pts:11, group:'goals'},
+    {key:'pm9f', text:'4+ total goals',            prob:15, pts:53, group:'goals'},
+    {key:'pm9g', text:'Evan Ferguson scores',      prob:29, pts:22},
+    {key:'pm9h', text:'Callum Wilson scores',      prob:29, pts:22},
+    {key:'pm9i', text:'Both teams score',          prob:55, pts:9},
+  ]},
+  {id:'pm10', label:'Man Utd vs Aston Villa', events:[
+    {key:'pm10a', text:'Man Utd win',              prob:36, pts:16, group:'result'},
+    {key:'pm10b', text:'Draw',                     prob:28, pts:22, group:'result'},
+    {key:'pm10c', text:'Aston Villa win',          prob:36, pts:16, group:'result'},
+    {key:'pm10d', text:'0–1 total goals',          prob:61, pts:8,  group:'goals'},
+    {key:'pm10e', text:'2–3 total goals',          prob:34, pts:17, group:'goals'},
+    {key:'pm10f', text:'4+ total goals',           prob:5,  pts:80, group:'goals'},
+    {key:'pm10g', text:'Benjamin Šeško scores',    prob:29, pts:22},
+    {key:'pm10h', text:'Nicolas Jackson scores',   prob:29, pts:22},
+    {key:'pm10i', text:'Both teams score',         prob:50, pts:10},
+  ]},
+];
+
+const PARLAY_MAX_MATCHES = 3;
+// Multipliers: 1 leg = 1×, 2 legs = 4×, 3 legs = 15×
+const PARLAY_MULTS = [0, 1, 4, 15];
+
+// ── HELPERS ─────────────────────────────────────────────────────────
+function $(s,p=document){return p.querySelector(s);}
+function $$(s,p=document){return p.querySelectorAll(s);}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function updateCoinBadges(){
+  document.getElementById('coins-match').textContent = state.coins.match;
+  document.getElementById('coins-chip').textContent  = state.coins.chip;
+  document.getElementById('coins-parlay').textContent= state.coins.parlay;
+}
+
+function calcMatchMaxPts(){
+  let total=0;
+  Object.values(state.picks).forEach(p=>{
+    if(p.winner!==null) total+=BUCKETS[p.wBucket||0].pts*(1+(p.wCoins||0));
+    if(p.sh!==''&&p.sa!=='') total+=BUCKETS[p.sBucket||0].pts*(1+(p.sCoins||0));
+  });
+  document.getElementById('match-pts-total').textContent = total;
+}
+
+function calcChipMaxPts(){
+  let total=0;
+  Object.values(state.chipPicks).forEach(c=>{
+    const ev=CHIP_MATCHES.flatMap(m=>m.events).find(e=>e.key===c.key);
+    if(ev) total+=ev.pts*(1+(c.coins||0));
+  });
+  document.getElementById('chip-pts-total').textContent=total;
+}
+
+function calcParlayMaxPts(){
+  let total=0;
+  PARLAY_MATCHES.forEach(m=>{
+    if(!state.parlayActive.has(m.id)) return;
+    const picks=state.parlayPicks[m.id]||new Set();
+    const n=picks.size;
+    if(n===0) return;
+    const mult=PARLAY_MULTS[n];
+    const baseSum=[...picks].reduce((s,key)=>{
+      const ev=m.events.find(e=>e.key===key);
+      return s+(ev?ev.pts:0);
+    },0);
+    total+=baseSum*mult;
+  });
+  document.getElementById('parlay-pts-total').textContent=total;
+}
+
+// ── MATCH PREDICTOR RENDER ───────────────────────────────────────────
+function renderMatchList(){
+  const container=document.getElementById('match-list');
+  container.innerHTML='';
+  MATCHES.forEach(m=>{
+    const p=state.picks[m.id]||{winner:null,sh:'0',sa:'0',wCoins:0,sCoins:0,locked:false};
+    state.picks[m.id]=p;
+
+    // Calc buckets
+    let wPct = m.crowd[p.winner!==null ? p.winner : 0];
+    let wBucket=winnerBucket(wPct);
+    let sBucket=0,sProb=0;
+    if(p.sh!==''&&p.sa!==''){
+      sProb=scoreProb(+p.sh,+p.sa);
+      sBucket=scoreBucket(sProb);
+      p.sBucket=sBucket;
+    }
+    p.wBucket=wBucket;
+
+    // Independent payouts — winner priced on crowd %, score on Poisson bucket
+    const wPts=winnerPayout(wPct);
+    const sPts=BUCKETS[p.sBucket||0].pts;
+    const wMult=1+(p.wCoins||0);
+    const sMult=1+(p.sCoins||0);
+    const bothPicked=p.winner!==null;
+
+    const card=document.createElement('div');
+    card.className='match-card'+(p.locked?' picked':'');
+    card.dataset.id=m.id;
+
+    card.innerHTML=`
+      <div class="match-header">
+        <span class="match-meta">GW9 · Premier League</span>
+        <span class="match-time">${m.time}</span>
+      </div>
+      <div class="match-teams">
+        <div class="team-home">
+          <span class="team-flag">${m.home.f}</span>
+          <span class="team-name">${m.home.n}</span>
+        </div>
+        <span class="vs-sep">VS</span>
+        <div class="team-away">
+          <span class="team-flag">${m.away.f}</span>
+          <span class="team-name">${m.away.n}</span>
+        </div>
+      </div>
+
+      <!-- Winner pick -->
+      <div class="pick-section">
+        <div class="pick-label">Who wins?</div>
+        <div class="winner-row">
+          ${[0,1,2].map(i=>{
+            const labels=[m.home.n,'Draw',m.away.n];
+            const pcts=m.crowd;
+            const iBucket=winnerBucket(pcts[i]);
+            const iB=BUCKETS[iBucket];
+            const iPts=winnerPayout(pcts[i]);
+            const isSel=p.winner===i;
+            return `<button class="w-btn${isSel?' sel':''}" data-mid="${m.id}" data-wi="${i}" ${p.locked?'disabled':''}>
+              <span class="w-btn-name">${labels[i]}</span>
+              ${isSel
+                ? `<span class="w-btn-bucket ${iB.color}">${iB.name} · +${iPts*wMult}</span>`
+                : `<span class="w-btn-pct">${pcts[i]}% · +${iPts}</span>`}
+            </button>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Score pick -->
+      <div class="pick-section">
+        <div class="pick-label">Exact score</div>
+        <div class="score-row">
+          <div class="score-inputs" style="flex-direction:column;gap:6px;align-items:stretch">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="stepper-wrap">
+                <button class="stepper-btn" data-mid="${m.id}" data-side="h" data-dir="-1" ${p.locked?'disabled':''}>−</button>
+                <span class="stepper-val">${p.sh!==''?p.sh:'0'}</span>
+                <button class="stepper-btn" data-mid="${m.id}" data-side="h" data-dir="1" ${p.locked?'disabled':''}>+</button>
+              </div>
+              <span class="score-dash">–</span>
+              <div class="stepper-wrap">
+                <button class="stepper-btn" data-mid="${m.id}" data-side="a" data-dir="-1" ${p.locked?'disabled':''}>−</button>
+                <span class="stepper-val">${p.sa!==''?p.sa:'0'}</span>
+                <button class="stepper-btn" data-mid="${m.id}" data-side="a" data-dir="1" ${p.locked?'disabled':''}>+</button>
+              </div>
+            </div>
+          </div>
+          <div class="score-reveal">
+            ${p.sh!==''&&p.sa!==''
+              ? `<div class="score-reveal-bucket ${BUCKETS[sBucket].color}">${BUCKETS[sBucket].name}</div>
+                 <div class="score-reveal-pts">+${sPts*sMult} pts max</div>`
+              : `<div class="score-reveal-bucket" style="color:var(--dim)">Enter score</div>`
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Coin allocation -->
+      ${!p.locked ? `
+      <div class="coin-alloc">
+        <div class="coin-alloc-label">Coins: <strong>${state.coins.match} left</strong> · max 3× per pick</div>
+        <div class="coin-pips">
+          ${[1,2,3].map(n=>`
+            <button class="coin-pip${(p.wCoins+p.sCoins)>=n?' filled':''}"
+              data-mid="${m.id}" data-cn="${n}">${n}</button>
+          `).join('')}
+          ${(p.wCoins||0)+(p.sCoins||0)>0?`<span class="coin-mult-preview">${1+(p.wCoins||0)+(p.sCoins||0)}× payout</span>`:''}
+        </div>
+      </div>` : ''}
+
+      <!-- Combined preview -->
+      <div class="combo-preview${bothPicked?' show':''}" id="combo-${m.id}">
+        <div class="combo-row">
+          <span class="combo-label">Winner pts</span>
+          <span class="combo-pts ${BUCKETS[wBucket].color}">+${p.winner!==null?wPts*wMult:0}</span>
+        </div>
+        <div class="combo-row" style="margin-top:4px">
+          <span class="combo-label">Score pts</span>
+          <span class="combo-pts ${BUCKETS[p.sBucket||0].color}">+${p.sh!==''&&p.sa!==''?sPts*sMult:0}</span>
+        </div>
+        <div class="combo-total">
+          <span class="combo-total-label">Max total</span>
+          <span class="combo-total-pts">+${(p.winner!==null?wPts*wMult:0)+(p.sh!==''&&p.sa!==''?sPts*sMult:0)}</span>
+        </div>
+      </div>
+
+      ${p.locked
+        ? `<div class="locked-badge">✓ Locked — ${['Home','Draw','Away'][p.winner]} · ${p.sh}–${p.sa}</div>`
+        : `<button class="lock-btn" data-mid="${m.id}" ${!bothPicked?'disabled':''}>
+            Lock in — ${p.winner!==null?[m.home.n,'Draw',m.away.n][p.winner]:'?'} · ${p.sh!==''&&p.sa!==''?p.sh+'-'+p.sa:'?–?'}
+           </button>`
+      }
+    `;
+    container.appendChild(card);
+  });
+  attachMatchEvents();
+  calcMatchMaxPts();
+}
+
+function attachMatchEvents(){
+  // Winner buttons
+  $$('.w-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const mid=btn.dataset.mid, wi=+btn.dataset.wi;
+      const p=state.picks[mid];
+      if(p.locked) return;
+      p.winner=wi;
+      renderMatchList();
+    });
+  });
+
+  // Stepper buttons
+  $$('.stepper-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const mid=btn.dataset.mid, side=btn.dataset.side, dir=+btn.dataset.dir;
+      const p=state.picks[mid];
+      if(p.locked) return;
+      const cur=side==='h'?(p.sh===''?0:+p.sh):(p.sa===''?0:+p.sa);
+      const next=Math.max(0,Math.min(9,cur+dir));
+      if(side==='h') p.sh=String(next); else p.sa=String(next);
+      renderMatchList();
+    });
+  });
+
+  // Coin pips
+  $$('.coin-pip').forEach(pip=>{
+    pip.addEventListener('click',()=>{
+      const mid=pip.dataset.mid, cn=+pip.dataset.cn;
+      const p=state.picks[mid];
+      const currentTotal=(p.wCoins||0)+(p.sCoins||0);
+      if(currentTotal===cn){
+        // toggle off
+        p.wCoins=0; p.sCoins=0;
+        state.coins.match += cn;
+      } else if(cn>currentTotal){
+        const need=cn-currentTotal;
+        if(state.coins.match<need){ showToast('Not enough match coins'); return; }
+        state.coins.match-=need;
+        // split evenly or put on score
+        p.sCoins=Math.min(cn,3);
+        p.wCoins=0;
+      } else {
+        const free=currentTotal-cn;
+        state.coins.match+=free;
+        p.sCoins=cn; p.wCoins=0;
+      }
+      updateCoinBadges();
+      renderMatchList();
+    });
+  });
+
+  // Lock buttons
+  $$('.lock-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const mid=btn.dataset.mid;
+      const p=state.picks[mid];
+      if(!p||p.winner===null||p.sh===''||p.sa==='') return;
+      p.locked=true;
+      const m=MATCHES.find(x=>x.id===mid);
+      showToast(`Locked: ${[m.home.n,'Draw',m.away.n][p.winner]} · ${p.sh}–${p.sa}`);
+      renderMatchList();
+    });
+  });
+}
+
+// ── CHIP GAME RENDER ─────────────────────────────────────────────────
+function getChipPicksCount(){return Object.keys(state.chipPicks).length;}
+
+function renderChipList(){
+  const container=document.getElementById('chip-list');
+  container.innerHTML='';
+  const used=getChipPicksCount();
+
+  CHIP_MATCHES.forEach(cm=>{
+    const block=document.createElement('div');
+    block.className='chip-match-block';
+    block.innerHTML=`
+      <div class="chip-match-header">
+        <span class="chip-match-name">${cm.match}</span>
+        <span class="chip-pick-limit">${cm.events.filter(e=>state.chipPicks[e.key]).length} picked</span>
+      </div>
+      <div class="chip-events">
+        ${cm.events.map(ev=>{
+          const picked=state.chipPicks[ev.key];
+          const bandCss=BAND_CSS[ev.band];
+          const coins=picked?picked.coins||0:0;
+          const selCls=picked?` sel-${bandCss}`:'';
+          return `
+          <div class="chip-event${selCls}" data-key="${ev.key}" data-band="${ev.band}" data-pts="${ev.pts}">
+            <div class="chip-event-left">
+              <span class="chip-color-dot ${bandCss}"></span>
+              <span class="chip-event-text">${ev.text}</span>
+            </div>
+            <div class="chip-event-right">
+              <span class="chip-band-label ${bandCss}">${BAND_LABELS[ev.band]}</span>
+              <span class="chip-pts ${bandCss}">+${ev.pts*(1+coins)}</span>
+              <span class="chip-check">${picked?'✓':''}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+    container.appendChild(block);
+  });
+
+  // Pips
+  const pipsEl=document.getElementById('chip-pips');
+  pipsEl.innerHTML='';
+  for(let i=0;i<5;i++){
+    const d=document.createElement('div');
+    d.className='chip-pip-dot'+(i<used?' used':'');
+    pipsEl.appendChild(d);
+  }
+  document.getElementById('chip-used').textContent=used;
+  document.getElementById('chip-coins-display').textContent=state.coins.chip;
+  calcChipMaxPts();
+  attachChipEvents();
+}
+
+function attachChipEvents(){
+  $$('.chip-event').forEach(ev=>{
+    ev.addEventListener('click',()=>{
+      const key=ev.dataset.key;
+      // Deselect if already picked
+      if(state.chipPicks[key]){
+        const c=state.chipPicks[key].coins||0;
+        state.coins.chip+=c;
+        delete state.chipPicks[key];
+        updateCoinBadges();
+        renderChipList();
+        return;
+      }
+      if(getChipPicksCount()>=5){ showToast('Pick limit reached (5 of 9)'); return; }
+      state.chipPicks[key]={key, coins:0};
+      renderChipList();
+    });
+  });
+}
+
+// ── PARLAY RENDER ────────────────────────────────────────────────────
+function parlayMatchFooter(m, picks){
+  const n=picks.size;
+  if(n===0) return `<div class="parlay-footer"><span class="parlay-footer-label">Pick 1–3 events</span><span class="parlay-footer-payout" style="color:var(--dim)">—</span></div>`;
+  const mult=PARLAY_MULTS[n];
+  const base=[...picks].reduce((s,key)=>{
+    const ev=m.events.find(e=>e.key===key); return s+(ev?ev.pts:0);
+  },0);
+  const total=base*mult;
+  const multLabel=n===1?'1×':n===2?'4×':'15×';
+  const big=n===3?' big':'';
+  return `<div class="parlay-footer">
+    <span class="parlay-footer-label">${n} pick${n>1?'s':''} · <strong>${multLabel} multiplier</strong></span>
+    <span class="parlay-footer-payout${big}">+${total}</span>
+  </div>`;
+}
+
+function renderParlayList(){
+  const container=document.getElementById('parlay-list');
+  container.innerHTML='';
+  const activeCount=state.parlayActive.size;
+
+  // Update subtitle
+  const remaining=PARLAY_MAX_MATCHES-activeCount;
+  document.getElementById('parlay-sub').textContent=
+    activeCount===0 ? `Choose ${PARLAY_MAX_MATCHES} matches to build your parlay on`
+    : remaining>0   ? `${activeCount} of ${PARLAY_MAX_MATCHES} matches selected · pick ${remaining} more`
+    :                 `${PARLAY_MAX_MATCHES} matches selected · pick 1–3 events each`;
+
+  PARLAY_MATCHES.forEach(m=>{
+    const active=state.parlayActive.has(m.id);
+    const picks=state.parlayPicks[m.id]||new Set();
+    const n=picks.size;
+    const full=activeCount>=PARLAY_MAX_MATCHES;
+    const locked=!active && full; // can't activate more
+
+    const badgeClass=!active?'n0':n===0?'n0':n===1?'n1':n===2?'n2':'n3';
+    const badgeLabel=!active?(locked?'Locked':'+ Add'):n===0?'No picks':n===1?'1×':n===2?'4×':'15×';
+
+    const card=document.createElement('div');
+    card.className='parlay-card'+(locked?' locked-match':'');
+    card.style.opacity=locked?'0.4':'1';
+    card.innerHTML=`
+      <div class="parlay-header" data-toggle="${m.id}" style="cursor:pointer">
+        <span class="parlay-title">${m.label}</span>
+        <span class="parlay-sel-badge ${badgeClass}">${badgeLabel}</span>
+      </div>
+      ${active ? `
+      <div class="parlay-events">
+        ${m.events.map(ev=>{
+          const sel=picks.has(ev.key);
+          return `<div class="parlay-ev${sel?' sel':''}" data-mid="${m.id}" data-ekey="${ev.key}">
+            <div class="parlay-ev-check">${sel?'✓':''}</div>
+            <span class="parlay-ev-text">${ev.text}</span>
+            <span class="parlay-ev-prob">${ev.prob}%</span>
+            <span class="parlay-ev-pts">+${ev.pts}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      ${parlayMatchFooter(m, picks)}` : ''}
+    `;
+    container.appendChild(card);
+  });
+
+  calcParlayMaxPts();
+  attachParlayEvents();
+}
+
+function attachParlayEvents(){
+  // Toggle match activation
+  $$('[data-toggle]').forEach(hdr=>{
+    hdr.addEventListener('click',()=>{
+      const mid=hdr.dataset.toggle;
+      if(state.parlayActive.has(mid)){
+        state.parlayActive.delete(mid);
+        delete state.parlayPicks[mid];
+      } else {
+        if(state.parlayActive.size>=PARLAY_MAX_MATCHES){
+          showToast(`Max ${PARLAY_MAX_MATCHES} matches — remove one first`);
+          return;
+        }
+        state.parlayActive.add(mid);
+      }
+      renderParlayList();
+    });
+  });
+
+  // Event picks within an active match
+  $$('.parlay-ev').forEach(row=>{
+    row.addEventListener('click', e=>{
+      e.stopPropagation();
+      const mid=row.dataset.mid, key=row.dataset.ekey;
+      const m=PARLAY_MATCHES.find(x=>x.id===mid);
+      const ev=m.events.find(e=>e.key===key);
+      if(!state.parlayPicks[mid]) state.parlayPicks[mid]=new Set();
+      const picks=state.parlayPicks[mid];
+      if(picks.has(key)){
+        picks.delete(key);
+      } else {
+        if(ev.group){
+          m.events.forEach(e=>{ if(e.group===ev.group && e.key!==key) picks.delete(e.key); });
+        }
+        if(picks.size>=3){ showToast('Max 3 picks per match'); return; }
+        picks.add(key);
+      }
+      renderParlayList();
+    });
+  });
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────
+$$('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    $$('.tab-btn').forEach(b=>b.classList.remove('active'));
+    $$('.mode-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.mode).classList.add('active');
+  });
+});
+
+// ── SUPABASE ──────────────────────────────────────────────────────────
+const SB_URL = 'https://mqizxnwznssxxbytoeln.supabase.co';
+const SB_KEY = 'sb_publishable_i0t57-0Lsv66MMpxrD_SSg_pIjEmL2y';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+let currentUser = null;
+
+async function authInit(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session) await authSetUser(session.user);
+  else showAuthModal();
+
+  sb.auth.onAuthStateChange((_ev, session)=>{
+    if(session) authSetUser(session.user);
+    else { currentUser=null; updateNavAuth(); }
+  });
+}
+
+async function authSetUser(user){
+  currentUser = user;
+  // ensure user_profiles row exists
+  const username = user.email.split('@')[0];
+  await sb.from('user_profiles').upsert({
+    id: user.id,
+    username,
+    display_name: username,
+  }, {onConflict:'id', ignoreDuplicates:true});
+  document.getElementById('auth-overlay').classList.add('hidden');
+  updateNavAuth();
+}
+
+function updateNavAuth(){
+  const btn = document.getElementById('nav-auth-btn');
+  const avatar = document.getElementById('nav-avatar');
+  const label = document.getElementById('nav-auth-label');
+  if(currentUser){
+    const initials = (currentUser.email||'?').slice(0,2).toUpperCase();
+    avatar.textContent = initials;
+    label.textContent = currentUser.email.split('@')[0];
+  } else {
+    avatar.textContent = '?';
+    label.textContent = 'Log In';
+  }
+}
+
+function navAuthClick(){
+  if(currentUser){
+    if(confirm('Log out?')){ sb.auth.signOut(); showAuthModal(); }
+  } else {
+    showAuthModal();
+  }
+}
+
+function showAuthModal(){
+  document.getElementById('auth-overlay').classList.remove('hidden');
+}
+
+let authMode = 'login';
+function authShowTab(mode){
+  authMode = mode;
+  document.getElementById('auth-tab-login').classList.toggle('active', mode==='login');
+  document.getElementById('auth-tab-signup').classList.toggle('active', mode==='signup');
+  document.getElementById('auth-submit').textContent = mode==='login'?'Log In':'Create Account';
+  document.getElementById('auth-err').textContent='';
+  if(mode==='signup'){
+    // add username field if not present
+    if(!document.getElementById('auth-username-field')){
+      const f=document.createElement('div');
+      f.className='auth-field'; f.id='auth-username-field';
+      f.innerHTML='<label>Username</label><input type="text" id="auth-username" placeholder="e.g. ahmed_fc" autocomplete="username">';
+      document.getElementById('auth-login-form').insertBefore(f, document.getElementById('auth-login-form').children[0]);
+    }
+  } else {
+    const uf=document.getElementById('auth-username-field');
+    if(uf) uf.remove();
+  }
+}
+
+async function authSubmit(){
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const errEl = document.getElementById('auth-err');
+  const btn   = document.getElementById('auth-submit');
+  if(!email||!pass){ errEl.textContent='Please fill in all fields'; return; }
+  btn.disabled=true; errEl.textContent='';
+  if(authMode==='signup'){
+    const username = (document.getElementById('auth-username')||{}).value||email.split('@')[0];
+    const { error } = await sb.auth.signUp({ email, password:pass, options:{ data:{ username } } });
+    if(error){ errEl.textContent=error.message; btn.disabled=false; return; }
+    errEl.style.color='var(--green)';
+    errEl.textContent='Check your email to confirm your account!';
+    btn.disabled=false;
+  } else {
+    const { error } = await sb.auth.signInWithPassword({ email, password:pass });
+    if(error){ errEl.textContent=error.message; btn.disabled=false; return; }
+    // authSetUser called by onAuthStateChange
+  }
+  btn.disabled=false;
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────────────────
+async function renderLeaderboard(){
+  const list = document.getElementById('lb-list');
+  if(!currentUser){ list.innerHTML='<div class="lb-empty">Log in to see the leaderboard</div>'; return; }
+  list.innerHTML='<div class="lb-empty">Loading…</div>';
+  const { data, error } = await sb
+    .from('leaderboard_snapshots')
+    .select('rank, gw_pts, total_pts, user_profiles(username,display_name)')
+    .eq('gameweek_id', 10)
+    .order('rank', {ascending:true})
+    .limit(50);
+  if(error||!data||data.length===0){
+    list.innerHTML='<div class="lb-empty">No scores yet — picks lock after kickoff</div>';
+    return;
+  }
+  list.innerHTML='';
+  data.forEach(row=>{
+    const profile = row.user_profiles||{};
+    const name = profile.display_name||profile.username||'Player';
+    const isMe = currentUser && (profile.username === currentUser.email.split('@')[0]);
+    const initials = name.slice(0,2).toUpperCase();
+    const div=document.createElement('div');
+    div.className='lb-row'+(isMe?' lb-you-row':'');
+    div.innerHTML=`
+      <div class="lb-rank${row.rank<=3?' top':''}">${row.rank}</div>
+      <div class="lb-avatar">${initials}</div>
+      <div class="lb-name${isMe?' me':''}">${name}${isMe?' (you)':''}</div>
+      <div style="text-align:right">
+        <div class="lb-pts">${row.gw_pts}</div>
+        <div class="lb-pts-label">GW pts</div>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+// ── PICK THE XI ──────────────────────────────────────────────────────
+const ARSENAL_SQUAD = [
+  // GK
+  {id:'raya',      name:'David Raya',           short:'Raya',      pos:'GK',  key:false},
+  {id:'kepa',      name:'Kepa Arrizabalaga',     short:'Kepa',      pos:'GK',  key:false},
+  {id:'meslier',   name:'Illan Meslier',         short:'Meslier',   pos:'GK',  key:false},
+  // DEF
+  {id:'white',     name:'Ben White',             short:'White',     pos:'DEF', key:false},
+  {id:'saliba',    name:'William Saliba',         short:'Saliba',    pos:'DEF', key:false},
+  {id:'gabriel',   name:'Gabriel Magalhães',     short:'Gabriel',   pos:'DEF', key:false},
+  {id:'konsa',     name:'Ezri Konsa',            short:'Konsa',     pos:'DEF', key:false},
+  {id:'timber',    name:'Jurrien Timber',         short:'Timber',    pos:'DEF', key:false},
+  {id:'hincapie',  name:'Piero Hincapié',        short:'Hincapié',  pos:'DEF', key:false},
+  {id:'calafiori', name:'Riccardo Calafiori',    short:'Calafiori', pos:'DEF', key:false},
+  {id:'mosquera',  name:'Cristhian Mosquera',    short:'Mosquera',  pos:'DEF', key:false},
+  // MID
+  {id:'odegaard',  name:'Martin Ødegaard',       short:'Ødegaard',  pos:'MID', key:false},
+  {id:'rice',      name:'Declan Rice',           short:'Rice',      pos:'MID', key:false},
+  {id:'saka',      name:'Bukayo Saka',           short:'Saka',      pos:'MID', key:true},
+  {id:'eze',       name:'Eberechi Eze',          short:'Eze',       pos:'MID', key:true},
+  {id:'merino',    name:'Mikel Merino',          short:'Merino',    pos:'MID', key:false},
+  {id:'zubimendi', name:'Martín Zubimendi',      short:'Zubimendi', pos:'MID', key:false},
+  {id:'lewis',     name:'Myles Lewis-Skelly',    short:'Lewis-Skelly',pos:'MID',key:false},
+  // FWD
+  {id:'havertz',   name:'Kai Havertz',           short:'Havertz',   pos:'FWD', key:true},
+  {id:'gyokeres',  name:'Viktor Gyökeres',       short:'Gyökeres',  pos:'FWD', key:true},
+];
+
+// Lock time: Sat 7 Nov 2026 14:00 UTC (1 hr before kickoff)
+const XI_LOCK_UTC = new Date('2026-11-07T14:00:00Z');
+
+const xiState = {
+  slots: Array(11).fill(null), // each null or player id
+  locked: false,
+};
+
+// slot layout: 0=GK, 1-4=DEF, 5-9=MID, 10=FWD
+const XI_ROWS = [
+  {label:'GK',  slots:[0]},
+  {label:'DEF', slots:[1,2,3,4]},
+  {label:'MID', slots:[5,6,7,8,9]},
+  {label:'FWD', slots:[10]},
+];
+
+function xiIsLocked(){
+  return xiState.locked || new Date() >= XI_LOCK_UTC;
+}
+
+function getPlayerById(id){ return ARSENAL_SQUAD.find(p=>p.id===id); }
+
+function xiFilledCount(){ return xiState.slots.filter(Boolean).length; }
+
+function renderXI(){
+  const pitch = document.getElementById('xi-pitch');
+  const locked = xiIsLocked();
+
+  // Build pitch rows — FWD at top, GK at bottom
+  pitch.innerHTML = '';
+  [...XI_ROWS].reverse().forEach(row=>{
+    const rowEl = document.createElement('div');
+    rowEl.className = 'xi-row';
+    row.slots.forEach(si=>{
+      const pid = xiState.slots[si];
+      const p = pid ? getPlayerById(pid) : null;
+      const slot = document.createElement('div');
+      slot.className = 'xi-slot' + (p ? ' filled' : '');
+      slot.dataset.slot = si;
+      if(!locked){
+        slot.addEventListener('dragover', xiDragOver);
+        slot.addEventListener('dragleave', xiDragLeave);
+        slot.addEventListener('drop', xiDrop);
+        slot.addEventListener('touchmove', xiTouchMove, {passive:false});
+        slot.addEventListener('touchend', xiTouchEnd);
+      }
+      if(p){
+        slot.innerHTML = `
+          <div class="xi-slot-circle">
+            <span class="xi-slot-initials">${p.short.slice(0,2).toUpperCase()}</span>
+            ${!locked?`<button class="xi-slot-remove" data-slot="${si}" title="Remove">×</button>`:''}
+          </div>
+          <div class="xi-slot-name">${p.short}</div>`;
+        if(!locked){
+          slot.querySelector('.xi-slot-remove').addEventListener('click',e=>{
+            e.stopPropagation();
+            const s=+e.currentTarget.dataset.slot;
+            xiState.slots[s]=null;
+            renderXI();
+            renderXISquad();
+            updateXILockBtn();
+          });
+        }
+      } else {
+        slot.innerHTML = `<div class="xi-slot-circle"></div><div class="xi-slot-name"></div>`;
+      }
+      rowEl.appendChild(slot);
+    });
+    pitch.appendChild(rowEl);
+  });
+
+  // Update count badge
+  const n = xiFilledCount();
+  document.getElementById('xi-count').innerHTML = `<span>${n}</span> / 11`;
+  updateXILockBtn();
+}
+
+function renderXISquad(){
+  const pool = document.getElementById('xi-squad-pool');
+  const locked = xiIsLocked();
+  const usedIds = new Set(xiState.slots.filter(Boolean));
+  pool.innerHTML='';
+
+  ['GK','DEF','MID','FWD'].forEach(pos=>{
+    const players = ARSENAL_SQUAD.filter(p=>p.pos===pos);
+    const section = document.createElement('div');
+    section.className = 'xi-squad-section';
+    section.innerHTML = `<div class="xi-squad-pos-label">${pos}</div>`;
+    const row = document.createElement('div');
+    row.className = 'xi-squad-row';
+    players.forEach(p=>{
+      const used = usedIds.has(p.id);
+      const chip = document.createElement('div');
+      chip.className = 'xi-player-chip' + (used?' used':'') + (locked?' locked':'');
+      chip.dataset.pid = p.id;
+      chip.innerHTML = `<span class="xi-chip-dot ${p.pos.toLowerCase()}"></span><span class="xi-chip-name${p.key?' key':''}">${p.short}</span>`;
+      if(!used && !locked){
+        chip.draggable = true;
+        chip.addEventListener('dragstart', xiDragStart);
+        chip.addEventListener('touchstart', xiTouchStart, {passive:false});
+      }
+      row.appendChild(chip);
+    });
+    section.appendChild(row);
+    pool.appendChild(section);
+  });
+}
+
+function updateXILockBtn(){
+  const btn = document.getElementById('xi-lock-btn');
+  const msg = document.getElementById('xi-locked-msg');
+  if(xiIsLocked()){
+    btn.style.display='none';
+    msg.style.display='block';
+    msg.textContent = xiState.locked ? '✓ Lineup locked — good luck!' : '🔒 Pick window closed';
+    return;
+  }
+  const n = xiFilledCount();
+  btn.disabled = n < 11;
+  btn.textContent = n < 11 ? `Lock In XI (${n}/11)` : 'Lock In XI ✓';
+  btn.style.display='';
+  msg.style.display='none';
+}
+
+// ── Drag & Drop (mouse) ───────────────────────────────────────────────
+let xiDragPid = null;
+
+function xiDragStart(e){
+  xiDragPid = e.currentTarget.dataset.pid;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.style.opacity='0.4';
+  setTimeout(()=>e.currentTarget.style.opacity='',0);
+}
+
+function xiDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  e.currentTarget.classList.add('drag-over');
+}
+
+function xiDragLeave(e){
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function xiDrop(e){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(!xiDragPid) return;
+  const slot = +e.currentTarget.dataset.slot;
+  // If slot already has a player, swap it back to pool (clear it)
+  xiState.slots[slot] = xiDragPid;
+  xiDragPid = null;
+  renderXI();
+  renderXISquad();
+  updateXILockBtn();
+}
+
+// ── Touch drag ────────────────────────────────────────────────────────
+let xiTouchPid = null;
+let xiGhostEl = null;
+
+function xiTouchStart(e){
+  if(e.touches.length !== 1) return;
+  e.preventDefault();
+  xiTouchPid = e.currentTarget.dataset.pid;
+  const p = getPlayerById(xiTouchPid);
+  xiGhostEl = document.getElementById('xi-drag-ghost');
+  xiGhostEl.textContent = p.short;
+  xiGhostEl.style.display = 'block';
+  xiMovGhost(e.touches[0]);
+}
+
+function xiTouchMove(e){
+  if(!xiTouchPid) return;
+  e.preventDefault();
+  xiMovGhost(e.touches[0]);
+  // Highlight slot under finger
+  $$('.xi-slot').forEach(s=>s.classList.remove('drag-over'));
+  const t = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+  const slot = t && t.closest('.xi-slot');
+  if(slot) slot.classList.add('drag-over');
+}
+
+function xiTouchEnd(e){
+  if(!xiTouchPid){ xiGhostEl && (xiGhostEl.style.display='none'); return; }
+  xiGhostEl.style.display='none';
+  $$('.xi-slot').forEach(s=>s.classList.remove('drag-over'));
+  const touch = e.changedTouches[0];
+  const t = document.elementFromPoint(touch.clientX, touch.clientY);
+  const slotEl = t && t.closest('.xi-slot');
+  if(slotEl){
+    const slot = +slotEl.dataset.slot;
+    xiState.slots[slot] = xiTouchPid;
+    renderXI();
+    renderXISquad();
+    updateXILockBtn();
+  }
+  xiTouchPid = null;
+}
+
+function xiMovGhost(touch){
+  if(!xiGhostEl) return;
+  xiGhostEl.style.left = (touch.clientX - 30) + 'px';
+  xiGhostEl.style.top  = (touch.clientY - 20) + 'px';
+}
+
+// ── Lock button ───────────────────────────────────────────────────────
+document.getElementById('xi-lock-btn').addEventListener('click',()=>{
+  if(xiFilledCount() < 11){ showToast('Place all 11 players first'); return; }
+  if(xiIsLocked()){ showToast('Pick window is closed'); return; }
+  xiState.locked = true;
+  renderXI();
+  renderXISquad();
+  updateXILockBtn();
+  showToast('Lineup locked! 🔒');
+});
+
+function initXI(){
+  renderXI();
+  renderXISquad();
+  updateXILockBtn();
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────
+$$('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    $$('.tab-btn').forEach(b=>b.classList.remove('active'));
+    $$('.mode-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    const mode = btn.dataset.mode;
+    document.getElementById('panel-'+mode).classList.add('active');
+    if(mode==='xi') initXI();
+    if(mode==='lb') renderLeaderboard();
+  });
+});
+
+// ── INIT ─────────────────────────────────────────────────────────────
+renderMatchList();
+renderChipList();
+renderParlayList();
+updateCoinBadges();
+authInit();
+</script>
+
+</body></html>
